@@ -48,13 +48,13 @@ pipeline {
     }
     stage('Run Docker Container') {
       agent {
-        docker { image 'docker:dind' }
+        docker { 
+          image 'hkyungkim/jenkins-ansible'
+          args '-u 0:0 -e DOCKER_HOST=tcp://172.31.20.17:2375'
+        }
       }
       steps {
-        // 계속적인 stop + 삭제 ... -> 별로 좋지 않다. -> ansible 필요
-        //sh 'docker -H tcp://172.31.20.17:2375 container stop hello-world'
-        //sh 'docker -H tcp://172.31.20.17:2375 container rm hello-world'
-        sh 'docker -H tcp://172.31.20.17:2375 container run --detach --name hello-world -p 80:8080 hkyungkim/hello-world:$BUILD_NUMBER'
+        ansiblePlaybook(playbook: 'docker-container-deploy.yaml')
       }
     }
   }
